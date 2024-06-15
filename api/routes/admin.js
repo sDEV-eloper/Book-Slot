@@ -6,34 +6,37 @@ const router = express.Router();
 
 // Middleware to check admin role
 const adminMiddleware = (req, res, next) => {
+  
   if (req.user.role !== 'admin') {
     return res.status(403).json({ message: 'Access denied' });
   }
   next();
 };
 
-// Create availability slots
-router.post('/slots', authMiddleware, adminMiddleware, async (req, res) => {
-  const { date, timeSlots } = req.body;
+// Get availability slots for admins
+router.get('/availability', authMiddleware,  adminMiddleware, async (req, res) => {
   try {
-    const slots = timeSlots.map(timeSlot => ({
-      adminId: req.user.userId,
-      date,
-      timeSlot,
-      status: 'available'
-    }));
-    await Booking.insertMany(slots);
-    res.status(201).json({ message: 'Slots created successfully' });
+    const slots = await Booking.find({ adminId: req.user._id });
+    console.log({slots})
+    res.json(slots);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// View bookings
-router.get('/bookings', authMiddleware, adminMiddleware, async (req, res) => {
+// Add new availability slot
+router.post('/add-slot', authMiddleware, adminMiddleware, async (req, res) => {
+  const { date, timeSlot } = req.body;
   try {
-    const bookings = await Booking.find({ adminId: req.user.userId }).populate('studentId', 'username');
-    res.json(bookings);
+    const newSlot = new Booking({
+      adminId: req.user._id,
+      date,
+      timeSlot,
+      status: 'available'
+    });
+    console.log({newSlot})
+    await newSlot.save();
+    res.status(201).json({ message: 'Slot added successfully', slot: newSlot });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

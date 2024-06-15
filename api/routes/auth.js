@@ -6,7 +6,7 @@ import User from '../models/User.js';
 const router = express.Router();
 
 // Register
-router.post('/register', async (req, res) => {
+router.post('/signup', async (req, res) => {
   const { username, password, role } = req.body;
   try {
     const user = new User({ username, password, role });
@@ -18,8 +18,8 @@ router.post('/register', async (req, res) => {
 });
 
 // Login
-router.post('/login', async (req, res) => {
-  const { username, password } = req.body;
+router.post('/signin', async (req, res) => {
+  const { username, password} = req.body;
   try {
     const user = await User.findOne({ username });
     if (!user) return res.status(400).json({ message: 'Invalid credentials' });
@@ -28,7 +28,9 @@ router.post('/login', async (req, res) => {
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
     const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.json({ token });
+    console.log("valid user===>", user._doc)
+    const { password: pass, ...rest } = user._doc;
+    res.json({ token, user: rest });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

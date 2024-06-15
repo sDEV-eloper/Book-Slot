@@ -22,7 +22,6 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/bookings', bookingRoutes);
 
 // MongoDB connection
-console.log("ENV data===", process.env.MONGO_URI)
 mongoose.connect(process.env.MONGO_URI).then(() => {
   console.log('MongoDB connected');
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

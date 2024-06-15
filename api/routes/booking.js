@@ -8,6 +8,7 @@ const router = express.Router();
 router.get('/slots', authMiddleware, async (req, res) => {
   try {
     const slots = await Booking.find({ status: 'available' }).populate('adminId', 'username');
+    console.log("slots=======>", slots)
     res.json(slots);
   } catch (err) {
     res.status(500).json({ error: err.message });
